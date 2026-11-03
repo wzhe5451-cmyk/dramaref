@@ -1,0 +1,286 @@
+/* ============================================================
+   DramaRef · 上传资产（抽屉 / 拖拽 / 我的资产）
+   覆盖层样式，配合 wb.css 使用
+   ============================================================ */
+
+/* ---------- 顶栏上传按钮 ---------- */
+.btn-upload {
+  height: 34px; padding: 0 15px 0 13px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--ember); color: #1A0A05;
+  font-size: 12px; font-weight: 600; letter-spacing: .02em;
+  border: 0; cursor: pointer; flex-shrink: 0;
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease), background .3s;
+  box-shadow: 0 8px 24px -12px rgba(255, 107, 61, .8);
+}
+.btn-upload svg { width: 13px; height: 13px; }
+.btn-upload:hover { background: var(--bone); transform: translateY(-1px); box-shadow: 0 12px 26px -14px rgba(237, 231, 219, .6); }
+.btn-upload:active { transform: scale(.97); }
+
+/* ---------- 侧栏 · 我的资产 ---------- */
+.mine-btn {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 12px; border-radius: 9px; width: 100%;
+  border: 1px dashed var(--line);
+  background: transparent; cursor: pointer;
+  font-size: 12.5px; color: var(--muted); text-align: left;
+  transition: all .28s var(--ease);
+}
+.mine-btn:hover { border-color: rgba(255, 107, 61, .55); color: var(--text); background: rgba(255, 107, 61, .05); }
+.mine-btn .mb-ic {
+  width: 20px; height: 20px; border-radius: 6px; flex-shrink: 0;
+  display: grid; place-items: center;
+  background: rgba(255, 107, 61, .14); color: var(--ember);
+  font-size: 13px; line-height: 1;
+}
+.mine-btn .mb-t { flex: 1; }
+.mine-btn em {
+  font-family: var(--f-mono); font-style: normal; font-size: 10px; color: var(--dim);
+}
+.mine-btn.on {
+  border-style: solid; border-color: var(--ember);
+  background: rgba(255, 107, 61, .12); color: #FFD9CB;
+}
+.mine-btn.on em { color: var(--ember); }
+
+/* ---------- 卡片 · 我的资产角标 ---------- */
+.tile-up {
+  position: absolute; bottom: 8px; left: 9px;
+  font-family: var(--f-mono); font-size: 8.5px; letter-spacing: .12em;
+  color: #1A0A05; background: var(--ember);
+  padding: 2px 6px; border-radius: 4px;
+  opacity: .95;
+}
+
+/* ---------- 抽屉打开时，工作台轻微后退 ---------- */
+.app-body {
+  transition: transform .55s var(--ease), filter .55s var(--ease);
+}
+body.drawer-open .app-body {
+  transform: translateX(-12px);
+  filter: brightness(.8) saturate(.88);
+}
+body.drawer-open .appbar { filter: brightness(.86); }
+
+/* ---------- 滚动联动：标题收缩 ---------- */
+.stage-bar {
+  transition: padding .3s var(--ease), margin .3s var(--ease);
+}
+.stage-bar h2 {
+  transition: font-size .34s var(--ease), opacity .3s;
+}
+.stage-bar.scrolled { padding-bottom: 10px; margin-bottom: 14px; }
+.stage-bar.scrolled h2 { font-size: 19px; opacity: .92; }
+
+/* ---------- 抽屉 ---------- */
+.drawer-scrim {
+  position: fixed; inset: 0; z-index: 70;
+  background: rgba(4, 4, 7, .66);
+  backdrop-filter: blur(3px);
+  opacity: 0; pointer-events: none;
+  transition: opacity .42s var(--ease);
+}
+.drawer-scrim.on { opacity: 1; pointer-events: auto; }
+
+.drawer {
+  position: fixed; top: 0; right: 0; z-index: 80;
+  width: min(520px, 94vw); height: 100vh;
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+  background: #0C0D12;
+  border-left: 1px solid var(--line-2);
+  box-shadow: -40px 0 90px -40px rgba(0, 0, 0, .9);
+  transform: translateX(103%);
+  transition: transform .52s cubic-bezier(.16, 1, .3, 1);
+  will-change: transform;
+}
+.drawer.open { transform: none; }
+
+.dr-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 20px 24px 18px;
+  border-bottom: 1px solid var(--line-2);
+}
+.dr-head h3 {
+  font-family: var(--f-serif); font-weight: 400; font-size: 21px;
+  letter-spacing: -.01em; color: var(--bone);
+}
+.dr-head p {
+  font-family: var(--f-mono); font-size: 9px; color: var(--dim);
+  letter-spacing: .08em; margin-top: 4px;
+}
+.dr-head .dr-x {
+  margin-left: auto; width: 30px; height: 30px; border-radius: 8px;
+  display: grid; place-items: center; flex-shrink: 0;
+  border: 1px solid var(--line-2); background: var(--panel);
+  color: var(--muted); cursor: pointer;
+  transition: all .26s var(--ease);
+}
+.dr-head .dr-x:hover { border-color: var(--ember); color: var(--ember); transform: rotate(90deg); }
+
+.dr-body {
+  overflow-y: auto; padding: 20px 24px 10px;
+  display: flex; flex-direction: column; gap: 20px;
+}
+.dr-body::-webkit-scrollbar { width: 6px; }
+.dr-body::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+
+/* 拖拽区 */
+.drop {
+  position: relative; cursor: pointer;
+  padding: 28px 20px 26px; border-radius: 12px;
+  border: 1px dashed var(--line);
+  background: var(--panel);
+  text-align: center;
+  transition: border-color .3s, background .3s, transform .35s var(--ease), box-shadow .35s;
+}
+.drop:hover { border-color: rgba(255, 107, 61, .45); background: #12131A; }
+.drop.over {
+  border-color: var(--ember);
+  background: rgba(255, 107, 61, .07);
+  transform: scale(1.014);
+  box-shadow: 0 0 0 4px rgba(255, 107, 61, .09);
+}
+.drop .drop-ic {
+  width: 44px; height: 44px; margin: 0 auto 12px;
+  border-radius: 12px; display: grid; place-items: center;
+  background: rgba(255, 107, 61, .1); color: var(--ember);
+  transition: transform .4s var(--ease);
+}
+.drop.over .drop-ic { transform: translateY(-3px) scale(1.06); }
+.drop .drop-t { font-size: 13.5px; color: var(--bone); font-weight: 500; }
+.drop .drop-s {
+  font-family: var(--f-mono); font-size: 9.5px; color: var(--dim);
+  margin-top: 6px; letter-spacing: .04em;
+}
+.drop .drop-btn {
+  margin-top: 14px; height: 34px; padding: 0 20px; border-radius: 9px;
+  background: var(--ember); color: #1A0A05; border: 0; cursor: pointer;
+  font-size: 12px; font-weight: 600;
+  transition: transform .26s var(--ease), background .26s;
+}
+.drop .drop-btn:hover { background: var(--bone); transform: translateY(-1px); }
+
+/* 区块标题 */
+.dr-label {
+  font-family: var(--f-mono); font-size: 9.5px; color: var(--dim);
+  letter-spacing: .16em; text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* 待入库文件行 */
+.flist { display: flex; flex-direction: column; gap: 6px; }
+.frow {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 10px; border-radius: 9px;
+  background: var(--panel); border: 1px solid transparent;
+  animation: frowIn .42s var(--ease) both;
+  transition: border-color .26s, background .26s;
+}
+.frow:hover { border-color: var(--line); background: #12131A; }
+@keyframes frowIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.fthumb {
+  width: 34px; height: 46px; border-radius: 5px; overflow: hidden;
+  flex-shrink: 0; background: #191A23;
+}
+.fthumb img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+
+.finfo { flex: 1; min-width: 0; }
+.fname {
+  width: 100%; background: transparent; border: 0; outline: none;
+  font-family: var(--f-zh); font-size: 12px; color: var(--text);
+  padding: 2px 0; border-bottom: 1px dashed rgba(38, 39, 47, .9);
+  transition: border-color .24s;
+}
+.fname:hover { border-bottom-color: var(--line); }
+.fname:focus { border-bottom-color: var(--ember); }
+.fmeta {
+  font-family: var(--f-mono); font-size: 8.5px; color: var(--dim);
+  margin-top: 3px; letter-spacing: .05em;
+}
+
+.fdel {
+  width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
+  display: grid; place-items: center;
+  border: 1px solid transparent; background: transparent;
+  color: var(--dim); cursor: pointer;
+  transition: all .24s var(--ease);
+}
+.fdel:hover { border-color: rgba(255, 107, 61, .5); color: var(--ember); }
+
+/* 设置 */
+.seg {
+  display: flex; gap: 3px; padding: 3px;
+  background: var(--panel); border-radius: 9px;
+  border: 1px solid var(--line-2);
+}
+.seg button {
+  flex: 1; height: 32px; border-radius: 7px; border: 0;
+  background: transparent; cursor: pointer;
+  font-size: 11.5px; color: var(--dim);
+  transition: all .26s var(--ease);
+}
+.seg button:hover { color: var(--text); }
+.seg button.on { background: rgba(255, 107, 61, .14); color: var(--ember); font-weight: 600; }
+
+.field {
+  display: flex; align-items: center; gap: 12px;
+  height: 40px; padding: 0 12px; margin-top: 8px;
+  background: var(--panel); border-radius: 9px;
+  border: 1px solid var(--line-2);
+  transition: border-color .26s;
+}
+.field:focus-within { border-color: rgba(255, 107, 61, .55); }
+.field > span {
+  font-size: 11px; color: var(--dim); flex-shrink: 0; min-width: 62px;
+}
+.field select, .field input {
+  flex: 1; background: transparent; border: 0; outline: none;
+  font-family: var(--f-zh); font-size: 12px; color: var(--text);
+  text-align: right; appearance: none; cursor: pointer;
+}
+.field input { text-align: left; cursor: text; }
+.field input::placeholder { color: #4E4B46; }
+.field select option { background: #14151B; color: var(--text); }
+
+.dr-hint {
+  font-size: 10.5px; color: var(--dim); line-height: 1.8;
+  margin-top: 14px; padding-top: 14px;
+  border-top: 1px dashed var(--line-2);
+}
+
+/* 底部 */
+.dr-foot {
+  display: flex; gap: 10px; align-items: center;
+  padding: 16px 24px; border-top: 1px solid var(--line-2);
+  background: #0C0D12;
+}
+.dr-btn {
+  height: 42px; border-radius: 9px; border: 1px solid transparent;
+  font-size: 12.5px; font-weight: 600; cursor: pointer;
+  transition: all .28s var(--ease);
+}
+.dr-btn.ghost { width: 104px; background: var(--panel); color: var(--muted); flex-shrink: 0; }
+.dr-btn.ghost:hover { color: var(--text); border-color: var(--line); }
+.dr-btn.primary {
+  flex: 1; background: var(--ember); color: #1A0A05;
+  box-shadow: 0 10px 26px -14px rgba(255, 107, 61, .9);
+}
+.dr-btn.primary:hover:not(:disabled) { background: var(--bone); transform: translateY(-1px); }
+.dr-btn.primary:disabled { opacity: .38; cursor: not-allowed; box-shadow: none; }
+
+/* 详情里的删除 */
+.d-btn[hidden] { display: none !important; }
+.d-btn.danger { border: 1px solid rgba(255, 107, 61, .32); color: rgba(255, 107, 61, .85); }
+.d-btn.danger:hover { border-color: var(--ember); color: var(--ember); background: rgba(255, 107, 61, .08); }
+
+@media (max-width: 760px) {
+  .btn-upload { padding: 0 12px; font-size: 11.5px; }
+  .dr-head { padding: 16px 18px 14px; }
+  .dr-body { padding: 16px 18px 8px; }
+  .dr-foot { padding: 14px 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer, .drop, .frow { transition: none; animation: none; }
+}

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>剧境 DramaRef · 服装与人物参考库</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Noto+Serif+SC:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;700&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/v2.css">
+<link rel="stylesheet" href="css/wb.css">
+<link rel="stylesheet" href="css/upload.css">
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div class="aurora"></div>
+<div class="grain"></div>
+<div class="veil"><div class="vmark">D</div></div>
+
+<div class="app">
+  <!-- 顶栏 -->
+  <header class="appbar">
+    <a class="brand" href="index.html">
+      <span class="glyph">D</span>
+      <span class="bn">剧境<small>DramaRef</small></span>
+    </a>
+
+    <div class="search">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
+      </svg>
+      <input type="text" id="searchInput" placeholder="搜索服饰、人物、编号、系列…">
+      <span class="kbd">⌘K</span>
+    </div>
+
+    <div class="sp"></div>
+
+    <button class="btn-upload" data-mag="0.22" data-open-upload>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <path d="M12 17V5"/><path d="M6 11l6-6 6 6"/>
+      </svg>
+      上传资产
+    </button>
+
+    <button class="fav-toggle" id="favToggle" title="只看收藏">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M12 20s-7-4.6-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.4 12 20 12 20z"/>
+      </svg>
+      <span id="favCount">0</span>
+    </button>
+  </header>
+
+  <div class="app-body">
+    <!-- 左侧筛选栏 -->
+    <aside class="sidebar">
+      <div class="side-block">
+        <div class="side-label">类型</div>
+        <div class="kind-list" id="kindList">
+          <button class="kind-item active" data-kind="costume">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M9 3l3 2 3-2 3 3-2 3v12H8V9L6 6z"/>
+            </svg>
+            <span>服装</span><em id="kCostume">0</em>
+          </button>
+          <button class="kind-item" data-kind="worn">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M12 7.2a1.8 1.8 0 1 0-1.8-1.8"/><path d="M12 7.2 3.6 13.4a1.7 1.7 0 0 0 .98 3.1h14.84a1.7 1.7 0 0 0 .98-3.1z"/>
+            </svg>
+            <span>上身实拍</span><em id="kWorn">0</em>
+          </button>
+          <button class="kind-item" data-kind="character">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6">
+              <circle cx="12" cy="8" r="3.6"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/>
+            </svg>
+            <span>人物</span><em id="kCharacter">0</em>
+          </button>
+        </div>
+      </div>
+
+      <div class="side-block">
+        <div class="side-label">我的资产</div>
+        <button class="mine-btn" id="mineBtn" title="只看自己上传的参考">
+          <span class="mb-ic">＋</span>
+          <span class="mb-t">我上传的</span>
+          <em id="mineCount">0</em>
+        </button>
+      </div>
+
+      <div class="side-block" id="srcBlock">
+        <div class="side-label">来源</div>
+        <div class="cat-list" id="srcList"></div>
+      </div>
+
+      <div class="side-block">
+        <div class="side-label">分类</div>
+        <div class="cat-list" id="catList"></div>
+      </div>
+
+      <div class="side-block" id="hairBlock">
+        <div class="side-label">发长</div>
+        <div class="cat-list" id="hairList"></div>
+      </div>
+
+      <div class="side-block" id="regionBlock">
+        <div class="side-label">地区</div>
+        <div class="cat-list" id="regionList"></div>
+      </div>
+
+      <div class="side-block" id="countryBlock">
+        <div class="side-label">国家 / 地区</div>
+        <div class="pill-row" id="countryRow"></div>
+      </div>
+
+      <div class="side-block">
+        <div class="side-label">风格</div>
+        <div class="pill-row" id="styleRow"></div>
+      </div>
+
+      <div class="side-block">
+        <div class="side-label">性别</div>
+        <div class="pill-row" id="genderRow"></div>
+      </div>
+
+      <button class="side-reset" id="resetBtn">清空筛选</button>
+    </aside>
+
+    <!-- 图墙 -->
+    <main class="stage">
+      <div class="stage-bar">
+        <h2 id="stageTitle">服装参考</h2>
+        <span class="count"><b id="resultCount">0</b> 条</span>
+        <div class="sp"></div>
+        <span class="src-note" id="libStats"></span>
+      </div>
+      <div class="wall" id="wall"></div>
+      <div class="wall-empty" id="wallEmpty" hidden>
+        <div class="t">没有匹配的参考</div>
+        <div class="s" id="emptyHint">试试点「清空筛选」，或换个关键词。</div>
+        <button class="empty-reset" id="emptyReset">清空筛选，看全部</button>
+      </div>
+    </main>
+
+    <!-- 右侧详情 -->
+    <aside class="detail" id="detail">
+      <div class="d-preview">
+        <img id="dImg" alt="" decoding="async">
+        <div class="d-shade"></div>
+        <div class="d-tc" id="dCode">—</div>
+        <div class="d-fav" id="dFav" title="收藏">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 20s-7-4.6-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.4 12 20 12 20z"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="d-body">
+        <div class="d-head">
+          <h3 id="dTitle">—</h3>
+          <p id="dSub">—</p>
+        </div>
+
+        <div class="d-tags" id="dTags"></div>
+
+        <div class="d-meta" id="dMeta"></div>
+      </div>
+
+      <div class="d-actions">
+        <button class="d-btn primary" id="dUse">复制参考描述</button>
+        <a class="d-btn ghost" id="dDownload" target="_blank" rel="noopener">下载原图</a>
+        <button class="d-btn danger" id="dDelete" hidden>从我的资产移除</button>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 上传抽屉 -->
+<div class="drawer-scrim" id="upScrim"></div>
+<aside class="drawer" id="upDrawer" aria-hidden="true">
+  <header class="dr-head">
+    <div>
+      <h3>上传资产</h3>
+      <p>JPG / PNG / WEBP · 单张 ≤ 12MB · 存在你自己的浏览器里</p>
+    </div>
+    <button class="dr-x" id="upClose" title="关闭">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 6l12 12M18 6L6 18"/>
+      </svg>
+    </button>
+  </header>
+
+  <div class="dr-body">
+    <div class="drop" id="upDrop">
+      <div class="drop-ic">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 16V4"/><path d="M6.5 9.5L12 4l5.5 5.5"/><path d="M4 20h16"/>
+        </svg>
+      </div>
+      <div class="drop-t">拖入文件，或点击选择</div>
+      <div class="drop-s">支持多选 · 自动编号 · 可批量改标签</div>
+      <button class="drop-btn" id="upPick">选择文件</button>
+      <input type="file" id="upInput" accept="image/jpeg,image/png,image/webp,image/avif" multiple hidden>
+    </div>
+
+    <div class="dr-sect" id="upQueueWrap" hidden>
+      <div class="dr-label" id="upQueueLabel">已选 0 个</div>
+      <div class="flist" id="upList"></div>
+    </div>
+
+    <div class="dr-sect">
+      <div class="dr-label">入库设置</div>
+      <div class="seg" id="upKindSeg">
+        <button data-k="costume">服装参考</button>
+        <button data-k="character" class="on">人物参考</button>
+      </div>
+      <div class="seg" id="upGenderSeg" style="margin-top:8px">
+        <button data-g="" class="on">不标性别</button>
+        <button data-g="女性">女性</button>
+        <button data-g="男性">男性</button>
+      </div>
+      <label class="field"><span>分类</span><select id="upCat"></select></label>
+      <label class="field"><span>项目标签</span><input id="upProject" placeholder="例：赛博雨夜 / 甜蜜 EP14" spellcheck="false"></label>
+      <div class="dr-hint">入库后可在左侧「我上传的」里随时找回，同样支持搜索、筛选、收藏与复制参考描述。图片只存在你自己的浏览器，不会上传到任何服务器。</div>
+    </div>
+  </div>
+
+  <footer class="dr-foot">
+    <button class="dr-btn ghost" id="upCancel">取消</button>
+    <button class="dr-btn primary" id="upCommit" disabled>入库</button>
+  </footer>
+</aside>
+
+<script src="js/motion.js"></script>
+<script src="js/library-data.js"></script>
+<script src="js/chars-data.js"></script>
+<script src="js/sources-data.js"></script>
+<script src="js/uploads.js"></script>
+<script src="js/workbench.js"></script>
+</body>
+</html>
