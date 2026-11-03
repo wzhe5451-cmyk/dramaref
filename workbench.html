@@ -63,12 +63,6 @@
             </svg>
             <span>服装</span><em id="kCostume">0</em>
           </button>
-          <button class="kind-item" data-kind="worn">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6">
-              <path d="M12 7.2a1.8 1.8 0 1 0-1.8-1.8"/><path d="M12 7.2 3.6 13.4a1.7 1.7 0 0 0 .98 3.1h14.84a1.7 1.7 0 0 0 .98-3.1z"/>
-            </svg>
-            <span>上身实拍</span><em id="kWorn">0</em>
-          </button>
           <button class="kind-item" data-kind="character">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6">
               <circle cx="12" cy="8" r="3.6"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/>
@@ -85,11 +79,6 @@
           <span class="mb-t">我上传的</span>
           <em id="mineCount">0</em>
         </button>
-      </div>
-
-      <div class="side-block" id="srcBlock">
-        <div class="side-label">来源</div>
-        <div class="cat-list" id="srcList"></div>
       </div>
 
       <div class="side-block">
@@ -123,6 +112,7 @@
       </div>
 
       <button class="side-reset" id="resetBtn">清空筛选</button>
+      <button class="side-reset side-export" id="exportBtn">导出全部提示词 .txt</button>
     </aside>
 
     <!-- 图墙 -->
@@ -163,6 +153,16 @@
         <div class="d-tags" id="dTags"></div>
 
         <div class="d-meta" id="dMeta"></div>
+
+        <div class="d-prompt" id="dPrompt" hidden>
+          <div class="dp-head">
+            <span class="dp-label">Prompt · 服饰提示词</span>
+            <button class="dp-btn" id="dpCopyZh" type="button">复制中文</button>
+            <button class="dp-btn" id="dpCopyEn" type="button">复制英文</button>
+          </div>
+          <div class="dp-zh" id="dpZh">—</div>
+          <pre class="dp-en" id="dpEn">—</pre>
+        </div>
       </div>
 
       <div class="d-actions">

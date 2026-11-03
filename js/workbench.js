@@ -19,7 +19,6 @@
     cat: "all",
     style: "all",
     gender: "all",
-    src: "all",
     hair: "all",
     region: "all",
     country: "all",
@@ -33,8 +32,8 @@
   };
 
   const HAIR_ORDER = ["短发", "中发", "中长发", "长发"];
-  const KIND_TITLE = { costume: "服装参考", worn: "上身实拍", character: "人物参考" };
-  const KIND_LABEL = { costume: "服装", worn: "上身实拍", character: "人物" };
+  const KIND_TITLE = { costume: "服装参考", character: "人物参考" };
+  const KIND_LABEL = { costume: "服装", character: "人物" };
 
   // 卡片副标题：只补标题里没出现的信息，避免「长发 · 人脸 / 日本 · 长发」这种重复
   function subLine(x) {
@@ -59,20 +58,16 @@
 
   /* ---------- 库容量文案 ---------- */
   function syncStats() {
-    const st = LIB.stats || {};
-    const srcItems = SRC.items || [];
-    const pure = srcItems.filter((x) => x.kind === "costume").length;
-    const worn = srcItems.length - pure;
     const ov = (CH.stats && CH.stats.overseas) || 0;
     const el = $("libStats");
     if (!el) return;
-    const total = (st.libTotal || st.total || 0) + srcItems.length;
+    const nc = byKind("costume").length;
+    const np = byKind("character").length;
     const bits = [];
-    if (pure) bits.push(`独立服饰 ${pure}`);
-    if (worn) bits.push(`实拍上身 ${worn}`);
-    if (ov) bits.push(`海外人物 ${ov}`);
-    el.textContent = `全库 ${total.toLocaleString()} 条 · 本地 ${ITEMS.length.toLocaleString()} 条` +
-      (bits.length ? `（采集 ${bits.join(" · ")}）` : "");
+    if (nc) bits.push(`服装 ${nc.toLocaleString()}`);
+    if (np) bits.push(`人物 ${np.toLocaleString()}`);
+    if (ov) bits.push(`海外 ${ov}`);
+    el.textContent = `库内 ${ITEMS.length.toLocaleString()} 条 · ${bits.join(" · ")}`;
   }
 
   /* ---------- 收藏持久化 ---------- */
@@ -108,8 +103,6 @@
   /* ---------- 侧栏：类型计数 ---------- */
   function renderKinds() {
     $("kCostume").textContent = byKind("costume").length;
-    const kw = $("kWorn");
-    if (kw) kw.textContent = byKind("worn").length;
     $("kCharacter").textContent = byKind("character").length;
     document.querySelectorAll(".kind-item").forEach((b) => {
       b.classList.toggle("active", b.dataset.kind === S.kind);
@@ -126,29 +119,6 @@
       const ic = mb.querySelector(".mb-ic");
       if (ic) ic.textContent = mine ? "＋" : "↑";
     }
-  }
-
-  /* ---------- 侧栏：来源（四站采集） ---------- */
-  const SRC_LABEL = { shopbop: "Shopbop · 独立服饰", withawish: "with a WISH", armstreet: "Armstreet", demobaza: "DEMOBAZA", vogue: "VOGUE 秀场" };
-  function renderSrcs() {
-    const pool = byKind(S.kind).filter((x) => !S.mine || x.mine);
-    const counts = new Map();
-    for (const x of pool) if (x.source) counts.set(x.source, (counts.get(x.source) || 0) + 1);
-
-    const block = $("srcBlock");
-    if (!block) return;
-    if (!counts.size) { block.style.display = "none"; return; }
-    block.style.display = "";
-    $("srcList").innerHTML =
-      `<button class="cat-item ${S.src === "all" ? "active" : ""}" data-src="all">
-         <span>全部来源</span><em>${pool.length}</em>
-       </button>` +
-      [...counts.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .map(([k, n]) => `<button class="cat-item ${S.src === k ? "active" : ""}" data-src="${k}">
-            <span>${SRC_LABEL[k] || k}</span><em>${n}</em>
-          </button>`)
-        .join("");
   }
 
   /* ---------- 侧栏：发长 / 地区 / 国家（人物专用） ---------- */
@@ -226,13 +196,10 @@
 
   /* ---------- 侧栏：分类 ---------- */
   function renderCats() {
-    renderSrcs();
     renderHair();
     renderRegion();
     renderCountry();
-    const pool = byKind(S.kind).filter(
-      (x) => (!S.mine || x.mine) && (S.src === "all" || x.source === S.src)
-    );
+    const pool = byKind(S.kind).filter((x) => !S.mine || x.mine);
     const counts = new Map();
     for (const x of pool) counts.set(x.cat, (counts.get(x.cat) || 0) + 1);
 
@@ -266,9 +233,7 @@
 
   /* ---------- 侧栏：风格 / 性别 ---------- */
   function renderPills() {
-    const pool = byKind(S.kind).filter(
-      (x) => (!S.mine || x.mine) && (S.src === "all" || x.source === S.src)
-    );
+    const pool = byKind(S.kind).filter((x) => !S.mine || x.mine);
     const ORDER = ["写实", "动漫", "自建"];
     const styles = [...new Set(pool.map((x) => x.style).filter(Boolean))]
       .sort((a, b) => {
@@ -294,10 +259,9 @@
 
   /* ---------- 切换类型（自愈残留筛选） ---------- */
   function setKind(k) {
-    if (k !== "costume" && k !== "worn" && k !== "character") return;
+    if (k !== "costume" && k !== "character") return;
     S.kind = k;
     S.cat = "all";
-    S.src = "all";
     S.hair = "all";
     S.region = "all";
     S.country = "all";
@@ -325,7 +289,6 @@
       if (x.kind !== S.kind) return false;
       if (S.mine && !x.mine) return false;
       if (S.cat !== "all" && x.cat !== S.cat) return false;
-      if (S.src !== "all" && x.source !== S.src) return false;
       if (S.hair !== "all" && x.hair !== S.hair) return false;
       if (S.region !== "all" && x.region !== S.region) return false;
       if (S.country !== "all" && x.country !== S.country) return false;
@@ -416,7 +379,6 @@
       const active = [];
       if (S.mine) active.push("只看我的资产");
       if (S.cat !== "all") active.push("分类「" + S.cat + "」");
-      if (S.src !== "all") active.push("来源「" + (SRC_LABEL[S.src] || S.src) + "」");
       if (S.hair !== "all") active.push("发长「" + S.hair + "」");
       if (S.region !== "all") active.push("地区「" + S.region + "」");
       if (S.country !== "all") active.push("国家「" + S.country + "」");
@@ -450,10 +412,75 @@
     });
   }
 
+  /* ---------- 服饰提示词（懒加载） ---------- */
+  let promptsLoad = null;
+  let curPrompt = null;
+  function loadPrompts() {
+    if (window.PROMPTS) return Promise.resolve(window.PROMPTS);
+    if (!promptsLoad) {
+      promptsLoad = new Promise((res, rej) => {
+        const sc = document.createElement("script");
+        sc.src = "js/prompts-data.js";
+        sc.async = true;
+        sc.onload = () => res(window.PROMPTS || {});
+        sc.onerror = () => { promptsLoad = null; rej(new Error("prompt load failed")); };
+        document.head.appendChild(sc);
+      });
+    }
+    return promptsLoad;
+  }
+
+  const esc = (s) => String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  /* 把「**上装・xxx** / - 颜色：…」纯文本渲染成分块规格表 */
+  function zhToHtml(txt) {
+    const out = [];
+    let open = false;
+    String(txt).split("\n").forEach((raw) => {
+      const line = raw.trim();
+      if (!line) return;
+      const m = line.match(/^\*\*(.+)\*\*$/);
+      if (m) {
+        if (open) out.push("</div></div>");
+        const parts = m[1].split("・");
+        const cat = parts.shift() || "";
+        const name = parts.join("・");
+        out.push('<div class="pr-block"><div class="pr-h">' +
+          (name
+            ? `<span class="pr-cat">${esc(cat)}</span><span class="pr-name">${esc(name)}</span>`
+            : `<span class="pr-cat solo">${esc(cat)}</span>`) +
+          '</div><div class="pr-list">');
+        open = true;
+        return;
+      }
+      if (line.startsWith("- ")) {
+        const body = line.slice(2);
+        const i = body.indexOf("：");
+        const k = i > 0 ? body.slice(0, i) : "";
+        const v = i > 0 ? body.slice(i + 1) : body;
+        out.push(`<div class="pr-row"><span class="pr-k">${esc(k)}</span><span class="pr-v">${esc(v)}</span></div>`);
+      }
+    });
+    if (open) out.push("</div></div>");
+    return out.join("");
+  }
+
+  function paintPrompt(rec) {
+    curPrompt = rec || null;
+    const zh = $("dpZh"), en = $("dpEn");
+    if (!zh || !en) return;
+    if (rec && rec.zh) zh.innerHTML = zhToHtml(rec.zh);
+    else zh.textContent = "暂无提示词";
+    en.textContent = (rec && rec.en) || "—";
+  }
+
   /* ---------- 详情 ---------- */
   function renderDetail() {
     const x = S.selected;
+    const PW = $("dPrompt");
     if (!x) {
+      if (PW) PW.hidden = true;
       $("dImg").removeAttribute("src");
       $("dCode").textContent = "—";
       $("dTitle").textContent = "未选中参考";
@@ -492,6 +519,31 @@
       .filter(([, v]) => v)
       .map(([k, v]) => `<div class="d-cell"><span>${k}</span><b>${v}</b></div>`)
       .join("");
+
+    if (PW) {
+      if (x.kind === "character" || x.mine) {
+        PW.hidden = true;
+      } else {
+        PW.hidden = false;
+        const cur = window.PROMPTS && window.PROMPTS[x.id];
+        if (cur) {
+          paintPrompt(cur);
+        } else {
+          $("dpZh").textContent = "正在载入提示词…";
+          $("dpEn").textContent = "";
+          loadPrompts()
+            .then((P) => {
+              if (!S.selected || S.selected.id !== x.id) return;
+              paintPrompt(P[x.id]);
+            })
+            .catch(() => {
+              if (!S.selected || S.selected.id !== x.id) return;
+              $("dpZh").textContent = "提示词加载失败，检查网络后重试";
+              $("dpEn").textContent = "—";
+            });
+        }
+      }
+    }
 
     const fav = $("dFav");
     fav.classList.toggle("on", S.favs.has(x.id));
@@ -537,7 +589,7 @@
 
   /* ---------- 清空筛选 ---------- */
   function resetFilters() {
-    S.cat = "all"; S.style = "all"; S.gender = "all"; S.src = "all";
+    S.cat = "all"; S.style = "all"; S.gender = "all";
     S.hair = "all"; S.region = "all"; S.country = "all";
     S.q = ""; S.favOnly = false; S.mine = false;
     const si = $("searchInput");
@@ -564,19 +616,6 @@
       S.cat = b.dataset.cat;
       renderCats(); syncWall();
     });
-
-    const sl = $("srcList");
-    if (sl) {
-      sl.addEventListener("click", (e) => {
-        const b = e.target.closest("[data-src]");
-        if (!b) return;
-        S.src = b.dataset.src;
-        S.cat = "all";
-        renderCats(); renderPills(); syncWall();
-        const stage = document.querySelector(".stage");
-        if (stage) stage.scrollTop = 0;
-      });
-    }
 
     const hl = $("hairList");
     if (hl) {
@@ -696,6 +735,66 @@
       }
     });
 
+    /* ---------- 提示词复制 / 导出 ---------- */
+    const copyTxt = async (txt, okMsg) => {
+      const v = (txt || "").trim();
+      if (!v || v === "—") return toast("暂无可复制内容");
+      try {
+        await navigator.clipboard.writeText(v);
+        return toast(okMsg);
+      } catch (e) { /* 回退到 execCommand */ }
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = v;
+        ta.style.cssText = "position:fixed;top:-9999px;left:-9999px;opacity:0";
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand("copy");
+        ta.remove();
+        toast(ok ? okMsg : "复制失败，请手动选中文本");
+      } catch (e) {
+        toast("复制失败，请手动选中文本");
+      }
+    };
+    const cZh = $("dpCopyZh");
+    if (cZh) cZh.addEventListener("click", () => copyTxt(curPrompt && curPrompt.zh, "中文规格已复制"));
+    const cEn = $("dpCopyEn");
+    if (cEn) cEn.addEventListener("click", () => copyTxt($("dpEn").textContent, "英文提示词已复制"));
+
+    const exBtn = $("exportBtn");
+    if (exBtn) {
+      exBtn.addEventListener("click", async () => {
+        const old = exBtn.textContent;
+        exBtn.disabled = true;
+        exBtn.textContent = "正在整理…";
+        try {
+          const P = await loadPrompts();
+          const rows = ITEMS.filter((x) => x.kind !== "character" && P[x.id]);
+          const body = rows
+            .map((x) => `【${x.code || x.id}】${x.zh || ""}\n${P[x.id].zh}\n\nEN · ${P[x.id].en}`)
+            .join("\n\n" + "—".repeat(26) + "\n\n");
+          const txt =
+            "剧境 DramaRef · 服饰提示词全量导出\n" +
+            `共 ${rows.length} 件服饰 · ${new Date().toLocaleDateString("zh-CN")}\n\n` +
+            body + "\n";
+          const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "dramaref-服饰提示词.txt";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+          toast(`已导出 ${rows.length} 条提示词`);
+        } catch (e) {
+          toast("导出失败，提示词未加载");
+        } finally {
+          exBtn.disabled = false;
+          exBtn.textContent = old;
+        }
+      });
+    }
+
     // 无限滚动（stage 内部滚动）
     const stage = document.querySelector(".stage");
     if (stage) {
@@ -725,6 +824,10 @@
   /* ---------- 启动 ---------- */
   async function init() {
     bind();
+
+    // 空闲时预载提示词层，点开详情即时可见（不影响首屏）
+    const idle = window.requestIdleCallback || ((f) => setTimeout(f, 1600));
+    idle(() => loadPrompts().catch(() => {}));
 
     loadFavs();
 
