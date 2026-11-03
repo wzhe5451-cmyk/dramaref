@@ -1,0 +1,47 @@
+{
+  // 剧境 DramaRef · 静态站点工程配置
+  // 纯静态文件，没有构建步骤：改完存盘，刷新浏览器就能看到。
+
+  "files.encoding": "utf8",
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+
+  "files.exclude": {
+    "**/.DS_Store": true,
+    "tools/.build": true
+  },
+
+  // assets/lib 是 2,475 张图，js/*-data.js 是自动生成的大数据文件，
+  // 全局搜索和文件监听都会被它们拖慢，这里都排除掉。
+  "search.exclude": {
+    "assets/lib": true,
+    "js/*-data.js": true,
+    "tools/.build": true
+  },
+  "files.watcherExclude": {
+    "**/assets/lib/**": true,
+    "**/tools/.build/**": true,
+    "**/.git/objects/**": true
+  },
+
+  "editor.tabSize": 2,
+  "editor.rulers": [100],
+  "editor.wordWrap": "on",
+
+  // 样式是手工调过行宽的，自动格式化会打乱，所以关掉保存时格式化。
+  "editor.formatOnSave": false,
+
+  // 端口与「▶ 本地预览」任务保持一致，两个入口打同一份文件。
+  "liveServer.settings.port": 8800,
+  "liveServer.settings.root": "/",
+  "liveServer.settings.donotShowInfoMsg": true,
+
+  "html.format.wrapLineLength": 0,
+  "css.lint.unknownAtRules": "ignore",
+
+  "[html]": { "editor.defaultFormatter": "vscode.html-language-features" },
+  "[css]": { "editor.defaultFormatter": "vscode.css-language-features" },
+  "[javascript]": { "editor.defaultFormatter": "vscode.typescript-language-features" },
+  "[markdown]": { "files.trimTrailingWhitespace": false }
+}

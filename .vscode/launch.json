@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "pwa-chrome",
+      "request": "launch",
+      "name": "调试工作台（Chrome）",
+      "url": "http://127.0.0.1:8800/workbench.html",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "▶ 本地预览（127.0.0.1:8800）"
+    },
+    {
+      "type": "pwa-chrome",
+      "request": "launch",
+      "name": "调试落地页（Chrome）",
+      "url": "http://127.0.0.1:8800/",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "▶ 本地预览（127.0.0.1:8800）"
+    }
+  ]
+}

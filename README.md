@@ -56,7 +56,7 @@
 dramaref/
 ├── index.html            落地页
 ├── workbench.html        参考工作台
-├── favicon.svg
+├── favicon.svg / favicon.ico / apple-touch-icon.png
 ├── css/
 │   ├── v2.css            落地页样式
 │   └── wb.css            工作台样式
@@ -68,17 +68,43 @@ dramaref/
 │   ├── prompts-data.js   服饰提示词 948（懒加载）
 │   ├── uploads.js        我的上传（localStorage）
 │   └── motion.js         动效
-└── assets/lib/           2,475 张本地图片
+├── assets/lib/           2,475 张本地图片
+├── tools/                生成脚本（词库、提示词、图标、自检）
+└── .vscode/              编辑器任务：预览 / 发布 / 重生成
 ```
 
-## 本地预览
+## 在 VS Code 里改
 
 ```bash
-python3 -m http.server 8080
-# 打开 http://127.0.0.1:8080/index.html
+code ~/Projects/dramaref      # 打开工程
 ```
 
-需通过 http 访问。直接双击 `file://` 打开会因浏览器安全策略导致部分数据加载失败。
+打开后按 `Cmd+Shift+B`（或 Tasks: Run Task → ▶ 本地预览），起本地服务器，
+浏览器开 <http://127.0.0.1:8800/> 边改边看。
+
+也可以装推荐的 Live Server 插件，右键 `index.html` → **Open with Live Server**，端口同样是 8800。
+
+### 工程里配好的任务
+
+| 任务 | 快捷键 / 入口 | 作用 |
+|---|---|---|
+| ▶ 本地预览 | `Cmd+Shift+B` | 跑 `python3 -m http.server 8800`，保持运行 |
+| ⬆ 发布到线上 | Run Task | `git add -A` → 输入提交说明 → `git push`，Pages 约 1 分钟后自动更新 |
+| ⬇ 同步线上改动 | Run Task | `git pull --rebase` |
+| ⟳ 重新生成提示词 | Run Task | 改完 `tools/dict.py` 或 `tools/slots.py` 后重出 948 条提示词 |
+| ⟳ 重新生成站点图标 | Run Task | 改完图标参数后重出 svg / ico / png |
+| 🩺 自检 | Run Task | 核对图片、提示词、id 与计数，改完数据先跑这个 |
+
+调试：`F5` 选「调试工作台（Chrome）」，会自动起服务器并挂上断点，可直接在 `js/workbench.js` 里打断点。
+
+> 必须通过 http 访问。直接双击 `file://` 打开会因浏览器安全策略导致部分数据加载失败。
+
+## 手动本地预览
+
+```bash
+python3 -m http.server 8800 --bind 127.0.0.1
+# 打开 http://127.0.0.1:8800/
+```
 
 ## 部署
 

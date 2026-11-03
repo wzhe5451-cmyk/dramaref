@@ -2,3 +2,8 @@
 Thumbs.db
 *.log
 node_modules/
+
+# 生成脚本的中间产物
+tools/.build/
+__pycache__/
+*.pyc

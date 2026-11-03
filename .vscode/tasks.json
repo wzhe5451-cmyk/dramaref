@@ -1,0 +1,81 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "▶ 本地预览（127.0.0.1:8800）",
+      "detail": "起一个静态服务器并保持运行，浏览器打开 http://127.0.0.1:8800/",
+      "type": "shell",
+      "command": "python3 -m http.server 8800 --bind 127.0.0.1",
+      "options": { "cwd": "${workspaceFolder}" },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "python",
+        "pattern": {
+          "regexp": "^(.*):(\\d+):\\s+(error|warning):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "severity": 3,
+          "message": 4
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^Serving HTTP",
+          "endsPattern": "^Serving HTTP"
+        }
+      },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "⬆ 发布到线上（commit + push）",
+      "detail": "提交全部改动并推送到 GitHub，Pages 约 1 分钟后自动更新",
+      "type": "shell",
+      "command": "git add -A && git commit -m '${input:msg}' && git push",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    },
+    {
+      "label": "⬇ 同步线上改动（pull）",
+      "detail": "拉取 GitHub 上的最新提交",
+      "type": "shell",
+      "command": "git pull --rebase",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "⟳ 重新生成提示词（948 条）",
+      "detail": "改了 tools/dict.py 或 tools/slots.py 之后跑这个，重写 js/prompts-data.js",
+      "type": "shell",
+      "command": "python3 tools/gen_prompts.py && python3 tools/build_prompts.py",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    },
+    {
+      "label": "⟳ 重新生成站点图标",
+      "detail": "改 tools/make_favicon.py 里的几何参数后跑这个，重出 svg / ico / png",
+      "type": "shell",
+      "command": "python3 tools/make_favicon.py",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "🩺 自检（图片 / 提示词 / 计数）",
+      "detail": "核对每件服饰的图片是否在位、提示词是否覆盖，改数据后建议先跑一次",
+      "type": "shell",
+      "command": "python3 tools/check_data.py",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "msg",
+      "type": "promptString",
+      "description": "本次改动说明（会作为 commit 消息）",
+      "default": "更新内容"
+    }
+  ]
+}
